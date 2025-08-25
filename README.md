@@ -21,5 +21,5 @@ Autonomous Indoor Drone Navigation (AIDN) — a Unity project simulating a LiDAR
 ## Quick Setup
 1. Clone or download this repository
 2. Open the project in **Unity 6 (tested on 6000.0.0f1, URP)**
-3. Open the **Small Demo Scene** at `Assets/Scenes/SampleScene`
+3. Open the small demo scene at `Assets/Scenes/SampleScene`
 4. *(Optional)* Experiment with your own scenes and adjust the drone’s component variables (see tooltips)
