@@ -11,7 +11,7 @@ A Unity project simulating a LiDAR-mounted drone that autonomously explores and 
 - **LiDAR simulation**: raycast sweeps generating configurable point clouds
 - **Voxel mapping**: scalable grid-based occupancy stored in chunks of byte arrays
 - **3D DDA**: voxel traversal algorithm used in line of sight checks and marking free cells along each ray
-- **Frontier detection & goal management** – identifies unknown boundaries and manages exploration targets
+- **Frontier detection & goal management**: identifies unknown boundaries and manages exploration targets
 - **Hybrid pathfinding**: weighted Theta* with jump point extension over voxels and A* over waypoints, followed by line-of-sight path smoothing
 - **Dynamic waypoint graph**: line-of-sight connectivity with auto-bridging for scalability
 - **GPU-instanced visualization**: efficient rendering of voxels, waypoints, frontiers, and paths
