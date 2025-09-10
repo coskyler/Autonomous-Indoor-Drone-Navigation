@@ -1,5 +1,5 @@
 # Autonomous Indoor Drone Navigation (AIDN)
-AIDN — a Unity project simulating a LiDAR-mounted drone that autonomously explores and maps indoor environments.
+A Unity project simulating a LiDAR-mounted drone that autonomously explores and maps indoor environments.
 
 ## Watch the Demo
 [![Watch the demo](https://img.youtube.com/vi/1ApMZhoQgPc/hqdefault.jpg)](https://www.youtube.com/watch?v=1ApMZhoQgPc)
