@@ -1,5 +1,5 @@
-# Autonomous Indoor Drone Navigation (AIDN)
-A Unity project simulating a LiDAR-mounted drone that autonomously explores and maps indoor environments.
+# Autonomous Indoor Drone Navigation
+A Unity project simulating a LiDAR-mounted drone that autonomously explores and maps indoor environments, streaming scans to [Fleet Control Dashboard](https://fleetcontrol.coskyler.com/scans/7)
 
 ## Watch the Demo
 [![Watch the demo](https://img.youtube.com/vi/1ApMZhoQgPc/hqdefault.jpg)](https://www.youtube.com/watch?v=1ApMZhoQgPc)
@@ -22,4 +22,8 @@ A Unity project simulating a LiDAR-mounted drone that autonomously explores and 
 1. Clone or download this repository
 2. Open the project in **Unity 6 (tested on 6000.0.0f1, URP)**
 3. Open the small demo scene at `Assets/Scenes/SampleScene`
-4. *(Optional)* Experiment with your own scenes and adjust the drone’s component variables (see tooltips)
+4. Open [the dashboard](https://fleetcontrol.coskyler.com/scans/7) in your browser (and create an account if you want to save your scans)
+5. Run the unity scene, and paste the fleet code from the console into the dashboard
+6. *(Optional)* Experiment with your own scenes and adjust the drone’s component variables (see tooltips)
+
+*Note: To test without using the dashboard, enable `ScanStarted` and increase `MaxSpeed` (~2.5 recommended) in the Drone's components*
