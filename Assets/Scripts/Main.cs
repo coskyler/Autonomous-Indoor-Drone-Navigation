@@ -84,6 +84,7 @@ public class Main : MonoBehaviour
     VoxelMap voxelMap;
     FlightController flightController;
     LineRenderer pathRenderer;
+    WSBehaviour ws;
 
     Vector3 previousFrontierTarget;
     Vector3 startPosition;
@@ -92,10 +93,12 @@ public class Main : MonoBehaviour
     List<ExplorationGoal> previousGoals = new();
     List<Vector3Int> droneFlightPath;
     List<Vector3Int> sphereOffsets = new(); // Used to set clearance around occupied voxels
+    List<Vector3Int> voxelsToSend = new(); // Websocket buffer
     
     HashSet<Vector3Int> unreachableVoxels = new();
     HashSet<Vector3Int> frontierVoxels = new();
     HashSet<Vector3Int> newFrees = new HashSet<Vector3Int>(); // Used to store potential frontiers
+    HashSet<Vector3Int> sentVoxels = new HashSet<Vector3Int>(); // Marks voxels that have already been sent to WS
 
     readonly Vector3Int[] dirs = new Vector3Int[6];
     readonly Vector3Int[] semiDiagDirs = new Vector3Int[18];
@@ -105,6 +108,7 @@ public class Main : MonoBehaviour
     Dictionary<int, int> occupiedPerLevel = new();
     Dictionary<int, int> freePerLevel = new();
     Dictionary<Vector3Int, List<Edge>> waypointGraph = new();
+    
 
     Mesh sphereMesh;
     Mesh cubeMesh;
@@ -231,19 +235,31 @@ public class Main : MonoBehaviour
         pathRenderer.startColor = Color.green;
         pathRenderer.endColor   = Color.green;
 
-
+        ws = GetComponent<WSBehaviour>();
     }
 
     float pathfindCooldown = 0.5f;
     float pathfindCooldownTimer = 1.5f;
     float addWpCd = 0.5f;
     float addWpCdTimer = 1.5f;
+    float wsMsgCooldown = 0.1f;
+    float WsMsgCdTimer = 1f;
+    public bool scanStarted = false;
+
 
     void Update()
     {
         float dt = Time.deltaTime;
         pathfindCooldownTimer -= dt;
         addWpCdTimer -= dt;
+        WsMsgCdTimer -= dt;
+
+        if (WsMsgCdTimer < 0 && scanStarted)
+        {
+            WsMsgCdTimer = wsMsgCooldown;
+            ws.Send(buildWsMsg());
+            voxelsToSend = new List<Vector3Int>();
+        }
 
         Stopwatch diagnosticsTimer = Stopwatch.StartNew();
         String diagnostics = $"{1f / dt} fps";
@@ -338,7 +354,33 @@ public class Main : MonoBehaviour
             voxelMap.Render(cubeMesh, cubeMat);
     
         
-        UnityEngine.Debug.Log(diagnostics);
+        //UnityEngine.Debug.Log(diagnostics);
+    }
+
+    string buildWsMsg()
+    {
+        float R2(float v) => Mathf.Round(v * 100f) / 100f;
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append("{\"voxels\":[");
+
+        for (int i = 0; i < voxelsToSend.Count; i++)
+        {
+            var v = voxelsToSend[i];
+            sb.Append($"{{\"x\":{R2(v.x)},\"y\":{R2(v.y)},\"z\":{R2(v.z)}}}");
+            if (i < voxelsToSend.Count - 1) sb.Append(",");
+        }
+
+        sb.Append("],\"drones\":[{");
+        sb.Append("\"name\":\"Alpha\",");
+        sb.AppendFormat("\"pos\":{{\"x\":{0},\"y\":{1},\"z\":{2}}},",
+            R2(transform.position.x), R2(transform.position.y), R2(transform.position.z));
+        sb.Append("\"scale\":{\"x\":1,\"y\":1,\"z\":1},");
+        sb.AppendFormat("\"orientation\":{{\"x\":{0},\"y\":{1},\"z\":{2},\"w\":{3}}}",
+            R2(transform.rotation.x), R2(transform.rotation.y), R2(transform.rotation.z), R2(transform.rotation.w));
+        sb.Append("}]}");
+
+        return sb.ToString();
     }
 
     void PerformScan()
@@ -407,6 +449,13 @@ public class Main : MonoBehaviour
                         freePerLevel[voxel.y] = Mathf.Max(0, freePerLevel.GetValueOrDefault(voxel.y, 0) - 1);
                     }
                     voxelMap.Add(voxel, 1);
+
+                    bool newAdd = sentVoxels.Add(voxel);
+                    if (newAdd)
+                    {
+                        voxelsToSend.Add(voxel);
+                    }
+
                     occupiedPerLevel[voxel.y] = occupiedPerLevel.GetValueOrDefault(voxel.y, 0) + 1;
                     frontierVoxels.Remove(voxel);
 
